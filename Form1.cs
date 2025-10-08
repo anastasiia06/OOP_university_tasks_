@@ -1,79 +1,70 @@
-﻿namespace BridgePatternExample
+﻿namespace ChainOfResponsibilityWinForms
 {
     public partial class Form1 : Form
     {
         public Form1()
         {
             InitializeComponent();
-            comboShape.Items.AddRange(new string[] { "Круг", "Квадрат" });
-            comboColor.Items.AddRange(new string[] { "Червоний", "Синій", "Зелений" });
-
-            comboShape.SelectedIndex = 0;
-            comboColor.SelectedIndex = 0;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void btnSend_Click(object sender, EventArgs e)
         {
+            string request = txtRequest.Text;
 
-        }
-
-        private void btnDraw_Click(object sender, EventArgs e)
-        {
-            IColor color;
-            switch (comboColor.SelectedItem.ToString())
+            if (string.IsNullOrWhiteSpace(request))
             {
-                case "Червоний":
-                    color = new RedColor();
-                    break;
-                case "Синій":
-                    color = new BlueColor();
-                    break;
-                default:
-                    color = new GreenColor();
-                    break;
+                lblResponse.Text = "Введіть повідомлення!";
+                return;
             }
-            Shape shape;
-            if (comboShape.SelectedItem.ToString() == "Круг")
-                shape = new Circle(color);
-            else
-                shape = new Square(color);
+            SupportHandler tech = new TechSupport();
+            SupportHandler finance = new FinanceSupport();
+            SupportHandler manager = new ManagerSupport();
 
-            lblResult.Text = shape.Draw();
+            tech.SetNext(finance);
+            finance.SetNext(manager);
+            lblResponse.Text = tech.Handle(request);
         }
     }
-    public interface IColor
+    public abstract class SupportHandler
     {
-        string ApplyColor();
+        protected SupportHandler next;
+
+        public void SetNext(SupportHandler nextHandler)
+        {
+            next = nextHandler;
+        }
+        public abstract string Handle(string request);
     }
-    public class RedColor : IColor
+    public class TechSupport : SupportHandler
     {
-        public string ApplyColor() => "червоний";
+        public override string Handle(string request)
+        {
+            if (request.ToLower().Contains("техніка"))
+                return "Технічна підтримка відповіла на ваше питання.";
+            else if (next != null)
+                return next.Handle(request);
+            else
+                return "Поки що, в нас немає відповіді, але ми розглянемо ваше питання.";
+        }
     }
 
-    public class BlueColor : IColor
+    public class FinanceSupport : SupportHandler
     {
-        public string ApplyColor() => "синій";
+        public override string Handle(string request)
+        {
+            if (request.ToLower().Contains("оплата") || request.ToLower().Contains("рахунок"))
+                return "Фінансова підтримка відповіла на ваше питання.";
+            else if (next != null)
+                return next.Handle(request);
+            else
+                return "Поки що, в нас немає відповіді, але ми розглянемо ваше питання.";
+        }
     }
-    public class GreenColor : IColor
+    public class ManagerSupport : SupportHandler
     {
-        public string ApplyColor() => "зелений";
+        public override string Handle(string request)
+        {
+            return "Поки що, в нас немає відповіді, але ми розглянемо ваше питання.";
+        }
     }
-    public abstract class Shape
-    {
-        protected IColor color;
-        public Shape(IColor color) => this.color = color;
-        public abstract string Draw();
-    }
-    public class Circle : Shape
-    {
-        public Circle(IColor color) : base(color) { }
-        public override string Draw() => $"Результат: {color.ApplyColor()} круг";
-    }
-    public class Square : Shape
-    {
-        public Square(IColor color) : base(color) { }
-        public override string Draw() => $"Результат: {color.ApplyColor()} квадрат";
-    }
-    
-
 }
