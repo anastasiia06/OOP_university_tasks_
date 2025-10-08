@@ -1,80 +1,79 @@
-﻿namespace FactoryMethodWinForms
+﻿namespace BridgePatternExample
 {
     public partial class Form1 : Form
     {
         public Form1()
         {
             InitializeComponent();
+            comboShape.Items.AddRange(new string[] { "Круг", "Квадрат" });
+            comboColor.Items.AddRange(new string[] { "Червоний", "Синій", "Зелений" });
+
+            comboShape.SelectedIndex = 0;
+            comboColor.SelectedIndex = 0;
         }
 
-        private void btnCreate_Click(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e)
         {
-            DocumentCreator creator;
 
-            if (radioWord.Checked)
-                creator = new WordCreator();
-            else if (radioPdf.Checked)
-                creator = new PdfCreator();
+        }
+
+        private void btnDraw_Click(object sender, EventArgs e)
+        {
+            IColor color;
+            switch (comboColor.SelectedItem.ToString())
+            {
+                case "Червоний":
+                    color = new RedColor();
+                    break;
+                case "Синій":
+                    color = new BlueColor();
+                    break;
+                default:
+                    color = new GreenColor();
+                    break;
+            }
+            Shape shape;
+            if (comboShape.SelectedItem.ToString() == "Круг")
+                shape = new Circle(color);
             else
-                creator = new ExcelCreator();
+                shape = new Square(color);
 
-            IDocument doc = creator.CreateDocument(txtTitle.Text);
-
-            lblResult.Text = $"Створено документ: {doc.GetInfo()}";
-            doc.Export();
-        }
-
-        private void lblResult_Click(object sender, EventArgs e)
-        {
-
+            lblResult.Text = shape.Draw();
         }
     }
-    public interface IDocument
+    public interface IColor
     {
-        string Title { get; set; }
-        string GetInfo();
-        void Export();
+        string ApplyColor();
     }
-    public class WordDocument : IDocument
+    public class RedColor : IColor
     {
-        public string Title { get; set; }
-        public string GetInfo() => $"Word документ '{Title}'";
-        public void Export() =>
-            MessageBox.Show($"'{Title}.docx' успішно збережено!", "Word Export");
+        public string ApplyColor() => "червоний";
     }
 
-    public class PdfDocument : IDocument
+    public class BlueColor : IColor
     {
-        public string Title { get; set; }
-        public string GetInfo() => $"PDF документ '{Title}'";
-        public void Export() =>
-            MessageBox.Show($"'{Title}.pdf' збережено як PDF!", "PDF Export");
+        public string ApplyColor() => "синій";
     }
-    public class ExcelDocument : IDocument
+    public class GreenColor : IColor
     {
-        public string Title { get; set; }
-        public string GetInfo() => $"Excel таблиця '{Title}'";
-        public void Export() =>
-            MessageBox.Show($"'{Title}.xlsx' збережено!", "Excel Export");
+        public string ApplyColor() => "зелений";
     }
-    public abstract class DocumentCreator
+    public abstract class Shape
     {
-        public abstract IDocument CreateDocument(string title);
+        protected IColor color;
+        public Shape(IColor color) => this.color = color;
+        public abstract string Draw();
     }
-    public class WordCreator : DocumentCreator
+    public class Circle : Shape
     {
-        public override IDocument CreateDocument(string title) =>
-            new WordDocument { Title = title };
+        public Circle(IColor color) : base(color) { }
+        public override string Draw() => $"Результат: {color.ApplyColor()} круг";
     }
+    public class Square : Shape
+    {
+        public Square(IColor color) : base(color) { }
+        public override string Draw() => $"Результат: {color.ApplyColor()} квадрат";
+    }
+    
 
-    public class PdfCreator : DocumentCreator
-    {
-        public override IDocument CreateDocument(string title) =>
-           new PdfDocument { Title = title };
-    }
-    public class ExcelCreator : DocumentCreator
-    {
-        public override IDocument CreateDocument(string title) =>
-            new ExcelDocument { Title = title };
-    }
 }
