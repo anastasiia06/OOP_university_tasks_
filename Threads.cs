@@ -12,7 +12,7 @@ class Program
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine("Введіть 10 чисел (0..25), по одному за раз:");
+        Console.WriteLine("Введіть 10 чисел (0..25):");
         Console.ResetColor();
 
         for (int i = 0; i < numbers.Length; i++)
@@ -69,4 +69,5 @@ class Program
         Console.WriteLine("(Потік T1) Добуток.");
     }
 }
+
 
