@@ -11,16 +11,27 @@ class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-        Random rand = new Random();
-
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine("Масив із 10 чисел (0..25):");
+        Console.WriteLine("Введіть 10 чисел (0..25), по одному за раз:");
         Console.ResetColor();
+
         for (int i = 0; i < numbers.Length; i++)
         {
-            numbers[i] = rand.Next(0, 26);
-            Console.Write(numbers[i] + " ");
+            int value;
+            while (true)
+            {
+                string input = Console.ReadLine();
+                if (int.TryParse(input, out value) && value >= 0 && value <= 25)
+                    break;
+                else
+                    Console.WriteLine("Помилка! Введіть ціле число від 0 до 25.");
+            }
+            numbers[i] = value;
         }
+
+        Console.WriteLine("\nВведений масив:");
+        foreach (int num in numbers)
+            Console.Write(num + " ");
         Console.WriteLine("\n");
 
      
@@ -58,3 +69,4 @@ class Program
         Console.WriteLine("(Потік T1) Добуток.");
     }
 }
+
